@@ -43,9 +43,7 @@ void setup() {
 
   for (int i = 0; i < wave.length; i++ ) {
     for (int j = 0; j < patern_relation.length; j++ ) {
-      if (random(0, 1) > 0.5f) {
         wave[i][j] = true;
-      }
     }
   }
 }
@@ -64,7 +62,7 @@ int MinimalEntropy() {
   ArrayList<Integer> minIndex = new ArrayList();
   minIndex.add(-1);
   int currentMin = paterns.length+1;
-
+ 
   for (int i = 0; i < wave.length; i++) {
     int entropy = calulateEntropy(i);
     if (entropy != 0 && entropy < currentMin) {
