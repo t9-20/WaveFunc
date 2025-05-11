@@ -11,6 +11,7 @@ int gridY;
 int cellSizeX = 50;
 int cellSizeY = 50;
 
+StackInt PropaStack;
 //Read the input bitmap and count NxN patterns.
 //(optional) Augment pattern data with rotations and reflections.
 
@@ -27,7 +28,9 @@ int cellSizeY = 50;
 void setup() {
   size(1000, 1000, P2D);
   //fullScreen(P2D);
-
+  
+  PropaStack = new StackInt(false,50);
+  
   gridX = width/cellSizeX;
   gridY = height/cellSizeY;
 
@@ -106,6 +109,15 @@ void collapseCell(int pos) {
   for (int j = 0; j < patern_relation.length; j++ ) {
     wave[pos][j] = false;
   }
+  wave[pos][landedPatern] = true;
+  
+  propagate(pos);
+  
+  wave[pos][landedPatern] = false;
+}
+
+void propagate(int initPos){
+  
 }
 
 
