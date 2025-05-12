@@ -54,6 +54,7 @@ class StackInt {
         stackHead ++;
         if (stack[stackHead] != NULL) {
           stack[forgetHead] = stack[stackHead]; 
+          forgetHead ++;
         }
         stack[stackHead] = n;
         forgetHead ++;
@@ -67,7 +68,7 @@ class StackInt {
     return stack[stackHead];
   }
   
-  boolean estVide(){
+  boolean isEmpty(){
     return stackHead == 0;
   }
 }

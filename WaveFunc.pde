@@ -117,7 +117,11 @@ void collapseCell(int pos) {
 }
 
 void propagate(int initPos){
+  PropaStack.empiler(initPos);
   
+  while (PropaStack.isEmpty()){
+    PropaStack.depiler();
+  }
 }
 
 
