@@ -7,11 +7,11 @@ class StackInt {
   boolean forgetfull;
 
   StackInt (boolean forgetfull, int limit) {
-    Reset(limit);
+    reset(limit);
     this.forgetfull = forgetfull;
   }
   
-  void Reset(int limit){
+  void reset(int limit){
     stack = new int[limit];
     for (int i = 0; i<limit;i++){
       stack[i] = NULL;
@@ -64,8 +64,9 @@ class StackInt {
   }
 
   int depiler() {
+    int n =  stack[stackHead];
     stackHead --;
-    return stack[stackHead];
+    return n; 
   }
   
   boolean isEmpty(){

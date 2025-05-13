@@ -8,10 +8,13 @@ byte[][] patern_relation;
 
 int gridX;
 int gridY;
-int cellSizeX = 50;
-int cellSizeY = 50;
+int cellSizeX = 25;
+int cellSizeY = 25;
 
-StackInt PropaStack;
+StackInt propaStack;
+StackInt initStack;
+
+int[] delta = {-1,-gridX,1,gridX};
 //Read the input bitmap and count NxN patterns.
 //(optional) Augment pattern data with rotations and reflections.
 
@@ -28,25 +31,58 @@ StackInt PropaStack;
 void setup() {
   size(1000, 1000, P2D);
   //fullScreen(P2D);
-  
-  PropaStack = new StackInt(false,50);
-  
+
   gridX = width/cellSizeX;
   gridY = height/cellSizeY;
+   
+  paterns = new Tile[28];
+  paterns[0] = new Tile("tile_0_0.png", 20,byte(0));
+  
+  paterns[1] = new Tile("tile_0_1.png", 10,byte(0));
+  paterns[2] = new Tile("tile_0_1.png", 10,byte(1));
+  paterns[3] = new Tile("tile_0_1.png", 10,byte(2));
+  paterns[4] = new Tile("tile_0_1.png", 10,byte(3));
+  
+  paterns[5] = new Tile("tile_0_2.png", 20,byte(0));
+  paterns[6] = new Tile("tile_0_2.png", 20,byte(1));
+  
+  paterns[7 ] = new Tile("tile_0_3.png", 10,byte(0));
+  paterns[8 ] = new Tile("tile_0_3.png", 10,byte(1));
+  paterns[9 ] = new Tile("tile_0_3.png", 10,byte(2));
+  paterns[10] = new Tile("tile_0_3.png", 10,byte(3));
+  
+  paterns[11] = new Tile("tile_0_4.png", 10,byte(0));
+  paterns[12] = new Tile("tile_0_4.png", 10,byte(1));
+  paterns[13] = new Tile("tile_0_4.png", 10,byte(2));
+  paterns[14] = new Tile("tile_0_4.png", 10,byte(3));
+  
+  paterns[15] = new Tile("tile_0_5.png", 10,byte(0));
+  paterns[16] = new Tile("tile_0_5.png", 10,byte(1));
+  paterns[17] = new Tile("tile_0_5.png", 10,byte(2));
+  paterns[18] = new Tile("tile_0_5.png", 10,byte(3));
+  
+  paterns[19] = new Tile("tile_0_6.png", 10,byte(0));
+  paterns[20] = new Tile("tile_0_6.png", 10,byte(1));
+  paterns[21] = new Tile("tile_0_6.png", 10,byte(2));
+  paterns[22] = new Tile("tile_0_6.png", 10,byte(3));
+  
+  paterns[23] = new Tile("tile_0_7.png", 10,byte(0));
+  
+  paterns[24] = new Tile("tile_0_8.png", 10,byte(0));
+  paterns[25] = new Tile("tile_0_8.png", 10,byte(1));
+  paterns[26] = new Tile("tile_0_8.png", 10,byte(2));
+  paterns[27] = new Tile("tile_0_8.png", 10,byte(3));
 
-  paterns = new Tile[6];
-  for (int i = 0; i < paterns.length; i++) {
-    paterns[i] = new Tile("tile_"+i+".png", 10);
-  }
-
-  patern_relation = new byte[6][];
+  patern_relation = new byte[paterns.length][];
 
   wave = new boolean[gridX*gridY][patern_relation.length];
   Output = new int[wave.length];
+  propaStack = new StackInt(true, wave.length);
+  initStack = new StackInt(true, wave.length);
 
   for (int i = 0; i < wave.length; i++ ) {
     for (int j = 0; j < patern_relation.length; j++ ) {
-        wave[i][j] = true;
+      wave[i][j] = true;
     }
   }
 }
@@ -65,7 +101,7 @@ int MinimalEntropy() {
   ArrayList<Integer> minIndex = new ArrayList();
   minIndex.add(-1);
   int currentMin = paterns.length+1;
- 
+
   for (int i = 0; i < wave.length; i++) {
     int entropy = calulateEntropy(i);
     if (entropy != 0 && entropy < currentMin) {
@@ -109,127 +145,149 @@ void collapseCell(int pos) {
   for (int j = 0; j < patern_relation.length; j++ ) {
     wave[pos][j] = false;
   }
-  wave[pos][landedPatern] = true;
-  
-  propagate(pos);
-  
+
   wave[pos][landedPatern] = false;
-}
+  //propagate(pos,landedPatern);
 
-void propagate(int initPos){
-  PropaStack.empiler(initPos);
-  
-  while (PropaStack.isEmpty()){
-    PropaStack.depiler();
-  }
-}
-
-
-void draw() {
-  background(128);
-  
-  int min = MinimalEntropy();
-  if (min != -1) {
-    printWave();
-    colorCell(min, color(255, 0, 0));
-    collapseCell(min);
-  } else {
-    printOutput();
-  }
   
 }
-//Repeat the following steps:
-//Observation:
-//Find a wave element with the minimal nonzero entropy.
-//If there is no such elements (if all elements have zero or undefined entropy) then break the cycle (4) and go to step (5).
-//Collapse this element into a definite state according to its coefficients and the distribution of NxN patterns in the input.
-//Propagation:
-//propagate information gained on the previous observation step.
-//By now all the wave elements are
-//either in a completely observed state (all the coefficients except one being zero)
-//In the first case return the output.
-//or in the contradictory state (all the coefficients being zero).
-//In the second case finish the work without returning anything.
 
+void propagate(int initPos, int initBan ) {
+  propaStack.empiler(initPos);
+  initStack.empiler(initBan);
 
-// print things
-
-void printEntropy() {
-  // only prints the waves entropy
-  fill(0);
-  textAlign(CENTER);
-  textSize(cellSizeY*0.4);
-  for (int x = 0; x < gridX; x++ ) {
-    for (int y = 0; y < gridY; y++ ) {
-      strokeWeight(5);
-      fill(255);
-      rect(x*cellSizeX, y*cellSizeY, cellSizeX, cellSizeY);
-      strokeWeight(1);
-      fill(0);
-      text(calulateEntropy(x+y*gridX), (x+0.5)*cellSizeX, (y+0.7)*cellSizeY);
+  while (propaStack.isEmpty()) {
+    int pos = propaStack.depiler();
+    int Ban = initStack.depiler();
+    for (int d = 0; d < 4; d++)
+    {
+      int nPos = pos + delta[d];
+      
+      
+      int nBan = 0;
+      propaStack.empiler(nPos);
+      initStack.empiler(nBan);
     }
   }
-  fill(255);
+  propaStack.reset(paterns.length);
+  initStack.reset(paterns.length);
 }
 
-void printWave() {
-  //print the wave with image + entropy
-  fill(0);
-  textAlign(CENTER);
-  textSize(40);
-  textureMode(NORMAL);
+  void draw() {
+    background(128);
 
-  for (int x = 0; x < gridX; x++ ) {
-    for (int y = 0; y < gridY; y++ ) {
-      printCell(x, y);
+    int min = MinimalEntropy();
+    if (min != -1) {
+      printWave();
+      colorCell(min, color(0, 0, 255));
+      collapseCell(min);
+    } else {
+      printOutput();
     }
   }
-}
+  //Repeat the following steps:
+  //Observation:
+  //Find a wave element with the minimal nonzero entropy.
+  //If there is no such elements (if all elements have zero or undefined entropy) then break the cycle (4) and go to step (5).
+  //Collapse this element into a definite state according to its coefficients and the distribution of NxN patterns in the input.
+  //Propagation:
+  //propagate information gained on the previous observation step.
+  //By now all the wave elements are
+  //either in a completely observed state (all the coefficients except one being zero)
+  //In the first case return the output.
+  //or in the contradictory state (all the coefficients being zero).
+  //In the second case finish the work without returning anything.
 
-void printCell(int x, int y) {
-  //print 1 cell with image + entropy
-  tint(255, 128);
-  for (int j = 0; j < patern_relation.length; j++ ) {
-    if (wave[x + (y * gridX)][j]) {
-      beginShape();
-      texture(paterns[j].display);
-      vertex(x*cellSizeX, y*cellSizeY, 0, 0);
-      vertex((x+1)*cellSizeX, y*cellSizeY, 1, 0);
+
+  // print things
+
+  void printEntropy() {
+    // only prints the waves entropy
+    fill(0);
+    textAlign(CENTER);
+    textSize(cellSizeY*0.4);
+    for (int x = 0; x < gridX; x++ ) {
+      for (int y = 0; y < gridY; y++ ) {
+        strokeWeight(5);
+        fill(255);
+        rect(x*cellSizeX, y*cellSizeY, cellSizeX, cellSizeY);
+        strokeWeight(1);
+        fill(0);
+        text(calulateEntropy(x+y*gridX), (x+0.5)*cellSizeX, (y+0.7)*cellSizeY);
+      }
+    }
+    fill(255);
+  }
+
+  void printWave() {
+    //print the wave with image + entropy
+    fill(0);
+    textAlign(CENTER);
+    textSize(40);
+    textureMode(NORMAL);
+
+    for (int x = 0; x < gridX; x++ ) {
+      for (int y = 0; y < gridY; y++ ) {
+        printCell(x, y);
+      }
+    }
+  }
+
+  void printCell(int x, int y) {
+    //print 1 cell with image + entropy
+    tint(255, 25);
+    for (int j = 0; j < patern_relation.length; j++ ) {
+      if (wave[x + (y * gridX)][j]) {
+        printTexture(x,y,j);
+      }
+    }
+    tint(255, 255);
+    text(calulateEntropy(x+y*gridX), (x+0.5)*cellSizeX, (y+0.7)*cellSizeY);
+  }
+
+  void colorCell(int x, int y, color tint) {
+    tint(255, 255);
+    fill(tint);
+    rect(x*cellSizeX, y*cellSizeY, cellSizeX, cellSizeY);
+  }
+
+  void colorCell(int pos, color tint) {
+    int x = pos%gridX;
+    int y = pos/gridX;
+    colorCell(x, y, tint);
+  }
+
+  void printOutput() {
+    for (int x = 0; x < gridX; x++ ) {
+      for (int y = 0; y < gridY; y++ ) {
+        printTexture(x, y, Output[x+y*gridX]);
+      }
+    }
+  }
+
+  void printTexture(int x, int y, int j) {
+    beginShape();
+    texture(paterns[j].display);
+    if (paterns[j].rotation == 0){
+      vertex(x*cellSizeX,     y*cellSizeY,     0, 0);
+      vertex((x+1)*cellSizeX, y*cellSizeY,     1, 0);
       vertex((x+1)*cellSizeX, (y+1)*cellSizeY, 1, 1);
-      vertex(x*cellSizeX, (y+1)*cellSizeY, 0, 1);
-      endShape();
+      vertex(x*cellSizeX,     (y+1)*cellSizeY, 0, 1);
+    } else if (paterns[j].rotation == 1){
+      vertex(x*cellSizeX, y*cellSizeY,         1, 0);
+      vertex((x+1)*cellSizeX, y*cellSizeY,     1, 1);
+      vertex((x+1)*cellSizeX, (y+1)*cellSizeY, 0, 1);
+      vertex(x*cellSizeX, (y+1)*cellSizeY,     0, 0);
+    } else if (paterns[j].rotation == 2){
+      vertex(x*cellSizeX, y*cellSizeY,         1, 1);
+      vertex((x+1)*cellSizeX, y*cellSizeY,     0, 1);
+      vertex((x+1)*cellSizeX, (y+1)*cellSizeY, 0, 0);
+      vertex(x*cellSizeX, (y+1)*cellSizeY,     1, 0);
+    } else if (paterns[j].rotation == 3){
+      vertex(x*cellSizeX, y*cellSizeY,         0, 1);
+      vertex((x+1)*cellSizeX, y*cellSizeY,     0, 0);
+      vertex((x+1)*cellSizeX, (y+1)*cellSizeY, 1, 0);
+      vertex(x*cellSizeX, (y+1)*cellSizeY,     1, 1);
     }
+    endShape();
   }
-  tint(255, 255);
-  text(calulateEntropy(x+y*gridX), (x+0.5)*cellSizeX, (y+0.7)*cellSizeY);
-}
-
-void colorCell(int x, int y, color tint) {
-  tint(255, 255);
-  fill(tint);
-  rect(x*cellSizeX, y*cellSizeY, cellSizeX, cellSizeY);
-}
-
-void colorCell(int pos, color tint) {
-  int x = pos%gridX;
-  int y = pos/gridX;
-  colorCell(x, y, tint);
-}
-
-void printOutput(){
-  for (int x = 0; x < gridX; x++ ) {
-    for (int y = 0; y < gridY; y++ ) {
-      printOutputCell(x,y);
-    }
-  } 
-}
-
-void printOutputCell(int x, int y){
-  beginShape();
-  texture(paterns[Output[x+y*gridX]].display);
-  vertex(x*cellSizeX, y*cellSizeY, 0, 0);
-  vertex((x+1)*cellSizeX, y*cellSizeY, 1, 0);
-  vertex((x+1)*cellSizeX, (y+1)*cellSizeY, 1, 1);
-  vertex(x*cellSizeX, (y+1)*cellSizeY, 0, 1);
-  endShape();
-}

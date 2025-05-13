@@ -1,10 +1,12 @@
 class Tile {
   PImage display;
   int proba;
+  byte rotation;
 
-  Tile(String adress,int proba) {
+  Tile(String adress,int proba,byte rotation) {
     display = loadImage(adress);
     this.proba = proba;
+    this.rotation = rotation;
   }
 
   Tile(color imgColor,int proba) {
