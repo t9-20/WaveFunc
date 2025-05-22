@@ -1,0 +1,17 @@
+ [
+   {
+     "adress": 0,
+     "probabilite": "Capra hircus",
+     "rotation": "Goat"
+   },
+   {
+     "adress": 1,
+     "probabilite": "Panthera pardus",
+     "rotation": "Leopard"
+   },
+   {
+     "adress": 2,
+     "probabilite": "Equus zebra",
+     "rotation": "Zebra"
+   }
+ ]
