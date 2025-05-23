@@ -1,10 +1,10 @@
-
+ //<>//
 boolean[][] wave;
 int[] Output;
 
 Tile[] paterns;
 
-byte[][] patern_relation;
+boolean[][][] paterns_relation;
 
 int gridX;
 int gridY;
@@ -15,6 +15,7 @@ StackInt propaStack;
 StackInt initStack;
 
 int[] delta;
+String[] reader;
 //Read the input bitmap and count NxN patterns.
 //(optional) Augment pattern data with rotations and reflections.
 
@@ -32,66 +33,109 @@ void setup() {
   size(1000, 1000, P2D);
   //fullScreen(P2D);
 
+
+
   gridX = width/cellSizeX;
   gridY = height/cellSizeY;
-  
+
   delta = new int[]{-1, -gridX, 1, gridX};
+  reader = new String[]{"up", "right", "down", "left"};
 
-  paterns = new Tile[28];
-  paterns[0] = new Tile("tile_0_0.png", 20, byte(0));
+  //chargement des tile
+  JSONArray tileset = loadJSONArray("tileset.json");
 
-  paterns[1] = new Tile("tile_0_1.png", 10, byte(0));
-  paterns[2] = new Tile("tile_0_1.png", 10, byte(1));
-  paterns[3] = new Tile("tile_0_1.png", 10, byte(2));
-  paterns[4] = new Tile("tile_0_1.png", 10, byte(3));
+  //initialise la liste des patern (paterne = tile)
+  //creation des object de tuile
+  paterns = GeneratePatern(tileset);
 
-  paterns[5] = new Tile("tile_0_2.png", 20, byte(0));
-  paterns[6] = new Tile("tile_0_2.png", 20, byte(1));
-
-  paterns[7] = new Tile("tile_0_3.png", 10, byte(0));
-  paterns[8] = new Tile("tile_0_3.png", 10, byte(1));
-  paterns[9] = new Tile("tile_0_3.png", 10, byte(2));
-  paterns[10] = new Tile("tile_0_3.png", 10, byte(3));
-
-  paterns[11] = new Tile("tile_0_4.png", 10, byte(0));
-  paterns[12] = new Tile("tile_0_4.png", 10, byte(1));
-  paterns[13] = new Tile("tile_0_4.png", 10, byte(2));
-  paterns[14] = new Tile("tile_0_4.png", 10, byte(3));
-
-  paterns[15] = new Tile("tile_0_5.png", 10, byte(0));
-  paterns[16] = new Tile("tile_0_5.png", 10, byte(1));
-  paterns[17] = new Tile("tile_0_5.png", 10, byte(2));
-  paterns[18] = new Tile("tile_0_5.png", 10, byte(3));
-
-  paterns[19] = new Tile("tile_0_6.png", 10, byte(0));
-  paterns[20] = new Tile("tile_0_6.png", 10, byte(1));
-  paterns[21] = new Tile("tile_0_6.png", 10, byte(2));
-  paterns[22] = new Tile("tile_0_6.png", 10, byte(3));
-
-  paterns[23] = new Tile("tile_0_7.png", 10, byte(0));
-
-  paterns[24] = new Tile("tile_0_8.png", 10, byte(0));
-  paterns[25] = new Tile("tile_0_8.png", 10, byte(1));
-  paterns[26] = new Tile("tile_0_8.png", 10, byte(2));
-  paterns[27] = new Tile("tile_0_8.png", 10, byte(3));
-
-  patern_relation = new byte[paterns.length][];
-  
-
-  wave = new boolean[gridX*gridY][patern_relation.length];
+  // finale initialisation
+  wave = new boolean[gridX*gridY][paterns.length];
   Output = new int[wave.length];
-  
-  
 
   for (int i = 0; i < wave.length; i++ ) {
-    for (int j = 0; j < patern_relation.length; j++ ) {
+    for (int j = 0; j < paterns.length; j++ ) {
       wave[i][j] = true;
     }
   }
-  
+
   propaStack = new StackInt(true, (paterns.length * wave.length));
-  initStack = new StackInt(true,  (paterns.length * wave.length));
+  initStack = new StackInt(true, (paterns.length * wave.length));
 }
+
+//fonction d'init
+
+Tile[] GeneratePatern(JSONArray tileset) {
+  ArrayList<Tile> paternsArray = new ArrayList<Tile>();
+  for (int i = 0; i < tileset.size(); i++) {
+
+    JSONObject tile = tileset.getJSONObject(i);
+    String symmetry = tile.getString("symmetry");
+
+    if (symmetry.equals("X")) {
+      paternsArray.add( new Tile(tile.getString("adress"), tile.getInt("probabilite"), byte(0)));
+    } else if (symmetry.equals("L")) {
+      paternsArray.add( new Tile(tile.getString("adress"), tile.getInt("probabilite"), byte(0)));
+      paternsArray.add( new Tile(tile.getString("adress"), tile.getInt("probabilite"), byte(1)));
+    } else if (symmetry.equals("O")) {
+      for (byte w = 0; w < 4; w++) {
+        paternsArray.add( new Tile(tile.getString("adress"), tile.getInt("probabilite"), byte(w)));
+      }
+    }
+  }
+  Tile[] paternsList = new Tile[paternsArray.size()];
+  for (int i = 0; i <  paternsArray.size(); i++) {
+    paternsList[i] = paternsArray.get(i);
+  }
+  return paternsList;
+}
+
+void generateRelation() {
+  paterns_relation = new boolean[4][paterns.length][paterns.length];
+}
+
+int[][] relationConnection(JSONArray tileset) {
+}
+
+void makeConnection(JSONObject tile, int rotation) {
+  for (byte i = 0; i < 4; i++) {
+    String[] temp = transformJSONArrayInt (tile.getJSONArray(reader[(i+rotation)%4]));
+  }
+}
+
+
+String[] transformJSONArrayString(JSONArray in) {
+  String[] retour = new String[in.size()];
+  for (int i = 0; i < in.size(); i++) {
+    retour[i] = in.getString(i);
+  }
+  return retour;
+}
+
+void draw() {
+  background(128);
+
+  int min = MinimalEntropy();// selection la cellule a éfondrer
+  if (min != -1) {
+    printWave();// imprime l'etat de l'image
+    colorCell(min, color(0, 0, 255));
+    int t = collapseCell(min);// on effondre la cellule
+    propagate(min, t); // et on propage
+  } else {
+    printOutput(); // resultat finale
+  }
+}
+//Repeat the following steps:
+//Observation:
+//Find a wave element with the minimal nonzero entropy.
+//If there is no such elements (if all elements have zero or undefined entropy) then break the cycle (4) and go to step (5).
+//Collapse this element into a definite state according to its coefficients and the distribution of NxN patterns in the input.
+//Propagation:
+//propagate information gained on the previous observation step.
+//By now all the wave elements are
+//either in a completely observed state (all the coefficients except one being zero)
+//In the first case return the output.
+//or in the contradictory state (all the coefficients being zero).
+//In the second case finish the work without returning anything.
 
 int calulateEntropy(int i) {
   int entropy = 0;
@@ -136,13 +180,13 @@ int totalValueCell(int i) {
   return total;
 }
 
-int[] validCoeficientCell(int i){
+int[] validCoeficientCell(int i) {
   int[] valid = new int[paterns.length];
   int w = 0;
   for (int j = 0; j < paterns.length; j++ ) {
     if (wave[i][j]) {
       valid[w] = j;
-      w++; 
+      w++;
     }
   }
   return valid;
@@ -151,7 +195,7 @@ int[] validCoeficientCell(int i){
 int collapseCell(int pos) {
   int choice = int(random(totalValueCell(pos)));
   int[] valid = validCoeficientCell(pos);
-  
+
   int landedPatern = 0;
   while (choice > paterns[valid[landedPatern]].proba) {
     choice -= paterns[valid[landedPatern]].proba;
@@ -161,12 +205,12 @@ int collapseCell(int pos) {
   println(valid[landedPatern]);
   Output[pos] = valid[landedPatern];
 
-  for (int j = 0; j < patern_relation.length; j++ ) {
+  for (int j = 0; j < paterns.length; j++ ) {
     wave[pos][j] = false;
   }
 
   //wave[pos][valid[landedPatern]] = false;
-  
+
   return valid[landedPatern];
 }
 
@@ -179,7 +223,7 @@ void propagate(int initPos, int initBan ) {
     int Ban = initStack.depiler();
     for (int d = 0; d < 4; d++)
     {
-      int nBan = (Ban)%paterns.length;
+      int nBan = (Ban);//%paterns.length;
 
       int x = (pos + delta[d]) % gridX;
       int y = (pos + delta[d]) / gridX;
@@ -188,7 +232,7 @@ void propagate(int initPos, int initBan ) {
       else if (x >= gridX) x -= gridX;
       if (y < 0) y += gridY;
       else if (y >= gridY) y -= gridY;
-      
+
       int nPos = x + (y*gridX);
       //println(x,y,nPos,nBan);
       if (wave[nPos][nBan] == true) {
@@ -199,38 +243,12 @@ void propagate(int initPos, int initBan ) {
     }
   }
   propaStack = new StackInt(true, (paterns.length * wave.length));
-  initStack = new StackInt(true,  (paterns.length * wave.length));
+  initStack = new StackInt(true, (paterns.length * wave.length));
 }
 
-void draw() {
-  background(128);
-
-  int min = MinimalEntropy();
-  if (min != -1) {
-    printWave();
-    colorCell(min, color(0, 0, 255));
-    int t = collapseCell(min);
-    propagate(min,t);
-  } else {
-    printOutput();
-  }
-}
-//Repeat the following steps:
-//Observation:
-//Find a wave element with the minimal nonzero entropy.
-//If there is no such elements (if all elements have zero or undefined entropy) then break the cycle (4) and go to step (5).
-//Collapse this element into a definite state according to its coefficients and the distribution of NxN patterns in the input.
-//Propagation:
-//propagate information gained on the previous observation step.
-//By now all the wave elements are
-//either in a completely observed state (all the coefficients except one being zero)
-//In the first case return the output.
-//or in the contradictory state (all the coefficients being zero).
-//In the second case finish the work without returning anything.
 
 
-// print things
-
+// output
 void printEntropy() {
   // only prints the waves entropy
   fill(0);
@@ -266,7 +284,7 @@ void printWave() {
 void printCell(int x, int y) {
   //print 1 cell with image + entropy
   tint(255, 25);
-  for (int j = 0; j < patern_relation.length; j++ ) {
+  for (int j = 0; j < paterns.length; j++ ) {
     if (wave[x + (y * gridX)][j]) {
       printTexture(x, y, j);
     }

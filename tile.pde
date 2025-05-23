@@ -4,7 +4,7 @@ class Tile {
   byte rotation;
 
   Tile(String adress,int proba,byte rotation) {
-    display = loadImage(adress);
+    display = loadImage(adress+".png");
     this.proba = proba;
     this.rotation = rotation;
   }
