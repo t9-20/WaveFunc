@@ -1,10 +1,13 @@
  //<>//
+final int[] opposite = { 2, 3, 0, 1 };
+
 boolean[][] wave;
 int[] Output;
 
 Tile[] paterns;
 
 boolean[][][] paterns_relation;
+int[][][] compatible;
 
 int gridX;
 int gridY;
@@ -49,6 +52,8 @@ void setup() {
   paterns = tileSet.GeneratePatern();
   paterns_relation = tileSet.generateRelation();
 
+  compatible = new int[wave.length][paterns.length][4];
+
   // finale initialisation
   wave = new boolean[gridX*gridY][paterns.length];
   Output = new int[wave.length];
@@ -64,6 +69,18 @@ void setup() {
 }
 
 //fonction d'init
+void ResetCompatible() {
+  for (int i = 0; i < wave.length; i++ ) {
+    for (int j = 0; j < paterns.length; j++ ) {
+      for (int d = 0; d < 4; d++) {
+        
+      }
+    }
+  }
+  
+  
+  compatible[i][j][d] 
+}
 
 
 void draw() {
@@ -190,8 +207,8 @@ void propagate(int initPos, int initBan ) {
 
       for (int i = 0; i < paterns.length; i++) {
         if (paterns_relation[Ban][i][d]) {
-            //println(x,y,nPos,nBan);
-            if (wave[nPos][i] == true) {
+          //println(x,y,nPos,nBan);
+          if (wave[nPos][i] == true) {
             propaStack.empiler(nPos);
             initStack.empiler(i);
             wave[nPos][i] = false;
