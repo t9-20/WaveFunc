@@ -16,6 +16,8 @@ StackInt initStack;
 
 int[] delta;
 String[] reader;
+
+TileSetReader tileSet;
 //Read the input bitmap and count NxN patterns.
 //(optional) Augment pattern data with rotations and reflections.
 
@@ -33,8 +35,6 @@ void setup() {
   size(1000, 1000, P2D);
   //fullScreen(P2D);
 
-
-
   gridX = width/cellSizeX;
   gridY = height/cellSizeY;
 
@@ -42,11 +42,12 @@ void setup() {
   reader = new String[]{"up", "right", "down", "left"};
 
   //chargement des tile
-  JSONArray tileset = loadJSONArray("tileset.json");
+  tileSet = new TileSetReader("tileset.json");
 
   //initialise la liste des patern (paterne = tile)
   //creation des object de tuile
-  paterns = GeneratePatern(tileset);
+  paterns = tileSet.GeneratePatern();
+  paterns_relation = tileSet.generateRelation();
 
   // finale initialisation
   wave = new boolean[gridX*gridY][paterns.length];
@@ -64,52 +65,6 @@ void setup() {
 
 //fonction d'init
 
-Tile[] GeneratePatern(JSONArray tileset) {
-  ArrayList<Tile> paternsArray = new ArrayList<Tile>();
-  for (int i = 0; i < tileset.size(); i++) {
-
-    JSONObject tile = tileset.getJSONObject(i);
-    String symmetry = tile.getString("symmetry");
-
-    if (symmetry.equals("X")) {
-      paternsArray.add( new Tile(tile.getString("adress"), tile.getInt("probabilite"), byte(0)));
-    } else if (symmetry.equals("L")) {
-      paternsArray.add( new Tile(tile.getString("adress"), tile.getInt("probabilite"), byte(0)));
-      paternsArray.add( new Tile(tile.getString("adress"), tile.getInt("probabilite"), byte(1)));
-    } else if (symmetry.equals("O")) {
-      for (byte w = 0; w < 4; w++) {
-        paternsArray.add( new Tile(tile.getString("adress"), tile.getInt("probabilite"), byte(w)));
-      }
-    }
-  }
-  Tile[] paternsList = new Tile[paternsArray.size()];
-  for (int i = 0; i <  paternsArray.size(); i++) {
-    paternsList[i] = paternsArray.get(i);
-  }
-  return paternsList;
-}
-
-void generateRelation() {
-  paterns_relation = new boolean[4][paterns.length][paterns.length];
-}
-
-int[][] relationConnection(JSONArray tileset) {
-}
-
-void makeConnection(JSONObject tile, int rotation) {
-  for (byte i = 0; i < 4; i++) {
-    String[] temp = transformJSONArrayInt (tile.getJSONArray(reader[(i+rotation)%4]));
-  }
-}
-
-
-String[] transformJSONArrayString(JSONArray in) {
-  String[] retour = new String[in.size()];
-  for (int i = 0; i < in.size(); i++) {
-    retour[i] = in.getString(i);
-  }
-  return retour;
-}
 
 void draw() {
   background(128);
@@ -202,7 +157,7 @@ int collapseCell(int pos) {
     landedPatern ++;
   }
 
-  println(valid[landedPatern]);
+  println(paterns[valid[landedPatern]].name);
   Output[pos] = valid[landedPatern];
 
   for (int j = 0; j < paterns.length; j++ ) {
@@ -223,8 +178,6 @@ void propagate(int initPos, int initBan ) {
     int Ban = initStack.depiler();
     for (int d = 0; d < 4; d++)
     {
-      int nBan = (Ban);//%paterns.length;
-
       int x = (pos + delta[d]) % gridX;
       int y = (pos + delta[d]) / gridX;
 
@@ -234,11 +187,16 @@ void propagate(int initPos, int initBan ) {
       else if (y >= gridY) y -= gridY;
 
       int nPos = x + (y*gridX);
-      //println(x,y,nPos,nBan);
-      if (wave[nPos][nBan] == true) {
-        propaStack.empiler(nPos);
-        initStack.empiler(nBan);
-        wave[nPos][nBan] = false;
+
+      for (int i = 0; i < paterns.length; i++) {
+        if (paterns_relation[Ban][i][d]) {
+            //println(x,y,nPos,nBan);
+            if (wave[nPos][i] == true) {
+            propaStack.empiler(nPos);
+            initStack.empiler(i);
+            wave[nPos][i] = false;
+          }
+        }
       }
     }
   }

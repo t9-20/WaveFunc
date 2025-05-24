@@ -2,14 +2,16 @@ class Tile {
   PImage display;
   int proba;
   byte rotation;
+  String name;
 
-  Tile(String adress,int proba,byte rotation) {
+  Tile(String adress,int proba,byte rotation,String name) {
     display = loadImage(adress+".png");
     this.proba = proba;
     this.rotation = rotation;
+    this.name = name;
   }
 
-  Tile(color imgColor,int proba) {
+  Tile(color imgColor,int proba,String name) {
     
     display = createImage(264, 264, RGB);
     display.loadPixels();
@@ -18,5 +20,6 @@ class Tile {
     }
     display.updatePixels();
     this.proba = proba;
+    this.name = name;
   }
 }
