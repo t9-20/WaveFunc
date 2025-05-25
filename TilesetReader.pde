@@ -42,7 +42,7 @@ class TileSetReader {
   }
 
   boolean[][][] generateRelation() {
-    boolean[][][] relation = new boolean[paterns.length][paterns.length][4];
+    boolean[][][] relation = new boolean[4][paterns.length][paterns.length];
     for (int i = 0; i < tileset.size(); i++) {
       JSONObject tile = tileset.getJSONObject(i);
       for (int r = 0; r < nLoopFromSymetry(tile); r++) {
@@ -58,7 +58,7 @@ class TileSetReader {
       String[] temp = getConectionList(tile, rotation, j);
       for (int i = 0; i < temp.length; i++) {
         int indexC = getIndexTile(temp[i]);
-        relation[indexT][indexC][(rotation+j)%4] = true;
+        relation[(rotation+j)%4][indexT][indexC] = true;
       }
     }
   }

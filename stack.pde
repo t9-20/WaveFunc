@@ -1,72 +1,32 @@
 class StackInt {
-  private final int NULL = -1;
   
   int[] stack;
   int stackHead;
-  int forgetHead;
-  boolean forgetfull;
+  int limit;
 
-  StackInt (boolean forgetfull, int limit) {
-    reset(limit);
-    this.forgetfull = forgetfull;
+  StackInt (int limit) {
+    stack = new int[limit];
+    this.limit = limit;
+    reset();
   }
   
-  void reset(int limit){
-    stack = new int[limit];
-    for (int i = 0; i<limit;i++){
-      stack[i] = NULL;
-    }
+  void reset(){
     stackHead = 0;
-    forgetHead = 0;
-  }
-
-  private boolean forgetContain(int n) {
-    boolean inStack = false;
-    int i = 0;
-    while (!inStack && i > forgetHead) {
-      inStack = stack[i] == n;
-      i++;
-    }
-    return inStack;
-  }
-
-  boolean Contain(int n) {
-    boolean inStack = false;
-    if (forgetfull) {
-      int i = 0;
-      while (!inStack && i > forgetHead) {
-        inStack = stack[i] == n;
-        i++;
-      }
-    } else {
-      inStack = forgetContain(n);
-    }
-    return inStack;
   }
 
   void empiler(int n) {
-    if (forgetfull) {
-      stackHead ++;
-      stack[stackHead] = n;
-    } else {
-
-      if (forgetContain(n)) {
-        stackHead ++;
-        if (stack[stackHead] != NULL) {
-          stack[forgetHead] = stack[stackHead]; 
-          forgetHead ++;
-        }
-        stack[stackHead] = n;
-        forgetHead ++;
-        assert forgetHead < stack.length;
-      }
-    }
+    stack[stackHead] = n;
+    stackHead ++;
   }
 
   int depiler() {
     int n =  stack[stackHead];
     stackHead --;
     return n; 
+  }
+  
+  int size(){
+    return stackHead;
   }
   
   boolean isEmpty(){
