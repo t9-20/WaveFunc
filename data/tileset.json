@@ -2,82 +2,42 @@
 	{
    		"id" : 0,
 		"adress": "tile_0_0",
-     		"probabilite": 10,
+     		"probabilite": 40,
 		"symmetry" : "X",
-		"up"   :["0x","1r","1d","2-","3r","5u","5l","6l"],
-		"down" :["0x","1u","1l","2-","3l","5d","5r","6r"],
-		"left" :["0x","1d","1l","2|","3u","5l","5d","6d"],
-		"right":["0x","1u","1r","2|","3d","5r","5u","6u"]
-   	},
-   	{
-   		"id" : 1 ,
-		"adress": "tile_0_1",
-     		"probabilite": 10,
-		"symmetry" : "O",
-		"up"   :["0x","1r","1d","2-","3r","5u","5l","6l"],
-		"down" :["1d","1l","2|","4r","6u","6d","6r"],
-		"left" :["1d","1r","2-","4u","6u","6l","6r"],
-		"right":["0x","1u","1r","2|","3d","5r","5u","6u"]
-   	},
-   	{
-   		"id" : 2,
-		"adress": "tile_0_2",
-     		"probabilite": 15,
-		"symmetry" : "L",
-		"up"   :["1u","1r","2|","4l","6u","6l","6d"],
-		"down" :["1d","1l","2|","4r","6u","6d","6r"],
-		"left" :["0x","1d","1l","2|","3u","5l","5d","6d"],
-		"right":["0x","1u","1r","2|","3d","5r","5u","6u"]
+		"up"   :["0x","3r","5u","5l"],
+		"down" :["0x","3l","5d","5r"],
+		"left" :["0x","3u","5l","5d"],
+		"right":["0x","3d","5r","5u"]
    	},
    	{
    		"id" : 3,
 		"adress": "tile_0_3",
      		"probabilite": 10,
 		"symmetry" : "O",
-		"up"   :["3u","4u","8u"],
-		"down" :["5u","3u","4u"],
+		"up"   :["3u","8u"],
+		"down" :["3u","5u"],
 		"left" :["7x"],
-		"right":["0x","1u","1r","2|","3d","5r","5u","6u"]
-   	},
-   	{
-   		"id" : 4,
-		"adress": "tile_0_4",
-     		"probabilite": 10,
-		"symmetry" : "O",
-		"up"   :["3u","4u","8u"],
-		"down" :["5u","3u","4u"],
-		"left" :["7x"],
-		"right":["1d","1r","2-","4u","6u","6l","6r"]
+		"right":["0x"]
    	},
    	{
    		"id" : 5,
 		"adress": "tile_0_5",
      		"probabilite": 10,
 		"symmetry" : "O",
-		"up"   :["3u","4u","8u"],
-		"down" :["0x","1u","1l","2-","3l","5d","5r","6r"],
-		"left" :["3l","4l","8u"],
-		"right":["0x","1u","1r","2|","3d","5r","5u","6u"]
-   	},
-   	{
-   		"id" : 6,
-		"adress": "tile_0_6",
-     		"probabilite": 10,
-		"symmetry" : "O",
-		"up"   :["1u","1r","2|","4l","6u","6l","6d"],
-		"down" :["1d","1l","2|","4r","6u","6d","6r"],
-		"left" :["0x","1d","1l","2|","3u","5l","5d","6d"],
-		"right":["1u","1l","2-","4d","6l","6r","6u"]
+		"up"   :["3u","8u"],
+		"down" :["0x","3l","5d","5r"],
+		"left" :["3l","8u"],
+		"right":["0x","3d","5r","5u"]
    	},
    	{
    		"id" : 7,
 		"adress": "tile_0_7",
-     		"probabilite": 10,
+     		"probabilite": 40,
 		"symmetry" : "X",
-		"up"   :["3r","4r","8d","8r"],
-		"down" :["3l","4l","8u","8l"],
-		"left" :["3d","4d","8d","8r"],
-		"right":["3u","4u","8u","8l"]
+		"up"   :["7x","3r","8d","8r"],
+		"down" :["7x","3l","8u","8l"],
+		"left" :["7x","3d","8d","8r"],
+		"right":["7x","3u","8u","8l"]
    	},
    	{
    		"id" : 8,
@@ -85,8 +45,8 @@
      		"probabilite": 10,
 		"symmetry" : "O",
 		"up"   :["7x"],
-		"down" :["5u","3u","4u"],
+		"down" :["5u","3u"],
 		"left" :["7x"],
-		"right":["5l","3l","4l","8l"]
+		"right":["5l","3l","8l"]
    	}
  ]

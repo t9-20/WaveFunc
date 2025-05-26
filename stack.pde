@@ -20,9 +20,8 @@ class StackInt {
   }
 
   int depiler() {
-    int n =  stack[stackHead];
     stackHead --;
-    return n; 
+    return stack[stackHead+1]; 
   }
   
   int size(){

@@ -58,7 +58,8 @@ class TileSetReader {
       String[] temp = getConectionList(tile, rotation, j);
       for (int i = 0; i < temp.length; i++) {
         int indexC = getIndexTile(temp[i]);
-        relation[(rotation+j)%4][indexT][indexC] = true;
+        relation[(j+rotation)%4][indexC][indexT] = true;
+        //relation[(rotation+j)%4][indexC][indexT] = true;
       }
     }
   }
@@ -98,7 +99,7 @@ class TileSetReader {
   }
 
   String[] getConectionList(JSONObject tile, int rotation, int j) {
-    String[] intitList = transformJSONArrayToStringList(tile.getJSONArray(reader[j]));
+    String[] intitList = transformJSONArrayToStringList(tile.getJSONArray(reader[(j)%4]));
     for (int i = 0; i < intitList.length; i++) {
       int Crotation = RotationFromName(intitList[i]);
       String symetry = SymetryFromName(intitList[i]);
@@ -125,11 +126,11 @@ class TileSetReader {
     char lastChar = tileName.charAt(tileName.length()-1);
     if (lastChar == 'u' || lastChar == '|' || lastChar == 'x') {
       return 0;
-    } else if (lastChar == 'l' || lastChar == '-') {
+    } else if (lastChar == 'r' || lastChar == '-') {
       return 1;
     } else if (lastChar == 'd') {
       return 2;
-    } else if (lastChar == 'r') {
+    } else if (lastChar == 'l') {
       return 3;
     } 
     return -1;
@@ -160,11 +161,11 @@ class TileSetReader {
       if (rotation == 0) {
         return "u";
       } else if (rotation == 1) {
-        return "l";
+        return "r";
       } else if (rotation == 2) {
         return "d";
       } else if (rotation == 3) {
-        return "r";
+        return "l";
       }
     }
     return null;

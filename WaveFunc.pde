@@ -10,8 +10,8 @@ int[][][] compatible;
 
 int gridX;
 int gridY;
-int cellSizeX = 50;
-int cellSizeY = 50;
+int cellSizeX = 250;
+int cellSizeY = 250;
 
 StackInt propaStack;
 StackInt initStack;
@@ -34,7 +34,7 @@ TileSetReader tileSet;
 //Initialize the wave in the completely unobserved state, i.e. with all the boolean coefficients being true.
 
 void setup() {
-  size(500, 500, P2D);
+  size(1000, 1000, P2D);
   //fullScreen(P2D);
 
   gridX = width/cellSizeX;
@@ -55,12 +55,14 @@ void setup() {
   wave = new boolean[gridX*gridY][paterns.length];
   Output = new int[wave.length];
 
+
   for (int i = 0; i < wave.length; i++ ) {
     for (int j = 0; j < paterns.length; j++ ) {
       wave[i][j] = true;
     }
+    Output[i] = -1;
   }
-  
+
   compatible = new int[wave.length][paterns.length][4];
   ResetCompatible();
 
@@ -79,6 +81,7 @@ void ResetCompatible() {
           if (paterns_relation[opposite[d]][j][f])
             total ++;
         }
+        //println(total);
         compatible[i][j][d] = total;
       }
     }
@@ -88,17 +91,34 @@ void ResetCompatible() {
 
 void draw() {
   background(128);
+  delay(5000);
+  randomSeed(1);
 
   int min = MinimalEntropy();// selection la cellule a éfondrer
   if (min != -1) {
     collapseCell(min);// on effondre la cellule
+    
     propagate(); // et on propage
     printWave();// imprime l'etat de l'image
-    colorCell(min, color(0, 255, 0,128));
-    //delay(100);
+    colorCell(min, color(0, 255, 0, 128));
+    
   } else {
+    
+    for (int i = 0; i < wave.length; i++) {
+      for (int t = 0; t < paterns.length; t++) {
+        if (wave[i][t]) {
+          Output[i] = t;
+          break;
+        }
+      }
+    }
     printOutput(); // resultat finale
+    println("stop");
+    noLoop();
   }
+  
+  //showRealtion();
+  //saveFrame();
 }
 //Repeat the following steps:
 //Observation:
@@ -130,7 +150,7 @@ int MinimalEntropy() {
 
   for (int i = 0; i < wave.length; i++) {
     int entropy = calulateEntropy(i);
-    if (entropy > 2 && entropy < currentMin) {
+    if (entropy >= 2 && entropy < currentMin) {
       currentMin = entropy ;
       minIndex = new ArrayList();
       minIndex.add(i);
@@ -138,12 +158,13 @@ int MinimalEntropy() {
       minIndex.add(i);
     }
   }
-  
+
   int randomChoice = int(random(0, minIndex.size()));
   return minIndex.get(randomChoice);
 }
 
 int totalValueCell(int i) {
+  // nombre de coeficient positif (true)
   int total = 0;
   for (int j = 0; j < paterns.length; j++ ) {
     if (wave[i][j]) {
@@ -166,7 +187,7 @@ int[] validCoeficientCell(int i) {
 }
 
 void collapseCell(int pos) {
-  int choice = int(random(totalValueCell(pos)));
+  float choice = random(totalValueCell(pos));
   int[] valid = validCoeficientCell(pos);
 
   int landedPatern = 0;
@@ -175,14 +196,12 @@ void collapseCell(int pos) {
     landedPatern ++;
   }
 
-  println(paterns[valid[landedPatern]].name);
-  Output[pos] = valid[landedPatern];
-
-  for (int t = 0; t < paterns.length; t++){ 
-    if (wave[pos][t] != (t == valid[landedPatern])){
-      Ban(pos,t);
+  for (int t = 0; t < paterns.length; t++) {
+    if (wave[pos][t] != (t == valid[landedPatern])) {
+      Ban(pos, t);
     }
   }
+  println("collapsed !", pos, valid[landedPatern]);
 }
 
 void propagate() {
@@ -190,12 +209,13 @@ void propagate() {
   while (!propaStack.isEmpty()) {
     int pos = propaStack.depiler();
     int Ban = initStack.depiler();
+    //println(propaStack.size());
     for (int d = 0; d < 4; d++)
     {
       int x = (pos + delta[d]) % gridX;
       int y = (pos + delta[d]) / gridX;
 
-      if (x < 0 || y < 0 || x + 1 > gridX || y + 1 > gridY) continue; 
+      if (x < 0 || y < 0 || x + 2> gridX || y + 2> gridY) continue;
 
       if (x < 0) x += gridX;
       else if (x >= gridX) x -= gridX;
@@ -208,39 +228,69 @@ void propagate() {
 
       for (int i = 0; i < paterns.length; i++) {
         if (r[i]) {
-          
+
           int[] comp = compat[i];
-            
+
           comp[d]--;
-          
+
           if (comp[d] == 0) {
-            Ban(nPos,i);
+            Ban(nPos, i);
+            println(nPos,paterns[i].name);
           }
         }
       }
     }
-    propaStack.reset();
-    initStack.reset();
   }
 }
 
-void Ban(int i,int t){
-  
+void Ban(int i, int t) {
+
   wave[i][t] = false;
-  
+
   int[] comp = compatible[i][t];
   for (int d = 0; d < 4; d++) {
     comp[d] = 0;
   }
   propaStack.empiler(i);
   initStack.empiler(t);
-  println(propaStack.size());
-  println(initStack.size());
-
 }
 
 
 // output
+void showRealtion() {
+  background(0);
+  float gX = width/paterns.length-5;
+  float gY = height/paterns.length-5;
+
+  float[] dx = {0.25, 0.75, 0.25, 0};
+  float[] dy = {0, 0.25, 0.75, 0.25};
+  
+  float[] sx = {2, 4, 2, 4};
+  float[] sy = {4, 2, 4, 2};
+  
+  color[] dc = {color(255, 0, 0), color(0, 255, 0), color(0, 0, 255), color(255, 0, 255)};
+
+  fill(0, 0, 0);
+  stroke(255);
+  strokeWeight(2);
+  for (int i = 1; i < paterns.length+1; i++ ) {
+    line(i*gX, 0, i*gX, height);
+    line(0, i*gY, width, i*gY);
+    printTexture(i, 0, i-1, gX, gY);
+    printTexture(0, i, i-1, gX, gY);
+  }
+  for (int w = 0; w < 4; w++) {
+    fill(dc[w]);
+    for (int x = 1; x < paterns.length+1; x++ ) {
+      for (int y = 1; y < paterns.length+1; y++ ) {
+        if (paterns_relation[w][x-1][y-1]) {
+          rect((x+dx[w])*gX, (y+dy[w])*gY, gX/sx[w], gY/sy[w]);
+        }
+      }
+    }
+  }
+}
+
 void printEntropy() {
   // only prints the waves entropy
   fill(0);
@@ -281,11 +331,11 @@ void printCellCompat(int x, int y) {
       printTexture(x, y, j);
     }
   }
-  textAlign(CENTER,CENTER);
+  textAlign(CENTER, CENTER);
   textSize(cellSizeY*0.2);
   tint(255, 255);
   for (int j = 0; j < 10; j++ ) {
-    for (int d = 0 ; d < 4 ; d++){
+    for (int d = 0; d < 4; d++) {
       text(compatible[x + (y * gridX)][j][d], (x+(d/4f))*cellSizeX, (y+float(j)/10)*cellSizeY);
     }
   }
@@ -316,36 +366,45 @@ void colorCell(int pos, color tint) {
 }
 
 void printOutput() {
+  stroke(255);
   for (int x = 0; x < gridX; x++ ) {
     for (int y = 0; y < gridY; y++ ) {
-      printTexture(x, y, Output[x+y*gridX]);
+      if (Output[x+y*gridX] != -1) {
+        printTexture(x, y, Output[x+(y*gridX)]);
+      } else {
+        colorCell(x+y*gridX, color(255, 255, 255));
+      }
     }
   }
 }
 
 void printTexture(int x, int y, int j) {
+  printTexture(x, y, j, cellSizeX, cellSizeY);
+}
+
+void printTexture(float x, float y, int j, float xs, float ys) {
   beginShape();
   texture(paterns[j].display);
   if (paterns[j].rotation == 0) {
-    vertex(x*cellSizeX, y*cellSizeY, 0, 0);
-    vertex((x+1)*cellSizeX, y*cellSizeY, 1, 0);
-    vertex((x+1)*cellSizeX, (y+1)*cellSizeY, 1, 1);
-    vertex(x*cellSizeX, (y+1)*cellSizeY, 0, 1);
+    vertex(x*xs, y*ys, 0, 0);
+    vertex((x+1)*xs, y*ys, 1, 0);
+    vertex((x+1)*xs, (y+1)*ys, 1, 1);
+    vertex(x*xs, (y+1)*ys, 0, 1);
   } else if (paterns[j].rotation == 1) {
-    vertex(x*cellSizeX, y*cellSizeY, 1, 0);
-    vertex((x+1)*cellSizeX, y*cellSizeY, 1, 1);
-    vertex((x+1)*cellSizeX, (y+1)*cellSizeY, 0, 1);
-    vertex(x*cellSizeX, (y+1)*cellSizeY, 0, 0);
+    vertex(x*xs, y*ys, 1, 0);
+    vertex((x+1)*xs, y*ys, 1, 1);
+    vertex((x+1)*xs, (y+1)*ys, 0, 1);
+    vertex(x*xs, (y+1)*ys, 0, 0);
   } else if (paterns[j].rotation == 2) {
-    vertex(x*cellSizeX, y*cellSizeY, 1, 1);
-    vertex((x+1)*cellSizeX, y*cellSizeY, 0, 1);
-    vertex((x+1)*cellSizeX, (y+1)*cellSizeY, 0, 0);
-    vertex(x*cellSizeX, (y+1)*cellSizeY, 1, 0);
+    vertex(x*xs, y*ys, 1, 1);
+    vertex((x+1)*xs, y*ys, 0, 1);
+    vertex((x+1)*xs, (y+1)*ys, 0, 0);
+    vertex(x*xs, (y+1)*ys, 1, 0);
   } else if (paterns[j].rotation == 3) {
-    vertex(x*cellSizeX, y*cellSizeY, 0, 1);
-    vertex((x+1)*cellSizeX, y*cellSizeY, 0, 0);
-    vertex((x+1)*cellSizeX, (y+1)*cellSizeY, 1, 0);
-    vertex(x*cellSizeX, (y+1)*cellSizeY, 1, 1);
+    vertex(x*xs, y*ys, 0, 1);
+    vertex((x+1)*xs, y*ys, 0, 0);
+    vertex((x+1)*xs, (y+1)*ys, 1, 0);
+    vertex(x*xs, (y+1)*ys, 1, 1);
   }
   endShape();
 }
